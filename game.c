@@ -2,38 +2,13 @@
 #include <time.h>
 #include <stdlib.h>
 #include <ctype.h>
-
-// DEFINE VARIABLES
-int enemySize = 20;
-int playerSize = 30;
-
-typedef struct {
-  int lives;
-  int level;
-  int position[2];
-  int velocity[2];
-} Player;
-
-typedef struct {
-  int position[2];
-  int velocity[2];
-} Enemy;
-
-int playing;
-
-// DEFINE FUNCTIONS
-char movePlayer(char moveKey, int position[], int velocity[], int size);
-char updateEnemyPositions(Enemy* enemies, int position[], int velocity[]);
-void checkPlayerPosition(int position[]);
-void formatEnemies(Enemy* enemies);
-int makeEnemies(Enemy* enemies);
-int checkInterjection(Enemy* enemies, int position[]);
-int checkPossibleInterjection(Enemy* enemies, int position[]);
-int resetEnemies(Enemy* enemies);
+#include "game.h"
 
 int main() {
-int playing = 'Y';
+char playing = 'Y';
 do {
+  int totalEnemyCount = 0;
+  int *pTOTAL = &totalEnemyCount;
   Player player1 = {3, 1, {300,300}, {0,0}};
 
   Enemy* enemies = malloc(10 * sizeof *enemies);
@@ -46,18 +21,19 @@ do {
     printf("\nInput a move (W,A,S,D): ");
     scanf(" %c", &playerMove);
     playerMove = toupper(playerMove);
-  
+
     movePlayer(playerMove, player1.position, player1.velocity, 2); // move the new player based on the given char (update position, based on velocity applied)
     checkPlayerPosition(player1.position); // set to within bounds if out of bounds, etc
-    updateEnemyPositions(enemies, player1.position, player1.velocity);
+    updateEnemyPositions(enemies, player1.position, player1.velocity, pTOTAL);
     checkPossibleInterjection(enemies, player1.position);
     if (checkInterjection(enemies, player1.position) != 0) {
       player1.lives--;
       printf("LIVES %d\n---------------------------------------------------------------------------------\n", player1.lives);
       resetEnemies(enemies);
     };
+    printf("\nSCORE: %d\n", totalEnemyCount);
   } while (player1.lives != 0);
-  printf("Would you like to play again? (Y/N)\n");
+  printf("\nWould you like to play again? (Y/N)\n");
   scanf(" %c", &playing);
   playing = toupper(playing);
   if (playing == 'Y') {
@@ -88,6 +64,11 @@ void checkPlayerPosition(int position[]) {
   }
 }
 
+
+/*
+    doesn't actually make enemies
+    just gives their properties values
+*/
 int makeEnemies(Enemy* enemies) {
   for (int i = 0; i < 10; i++) {
     // left or right determinant
@@ -134,7 +115,7 @@ void formatEnemies(Enemy* enemies) {
 }
 
 /*
-    for end of level
+    resets enemies to an original random state
 */
 int resetEnemies(Enemy* enemies) {
   if (makeEnemies(enemies)) {
@@ -146,7 +127,7 @@ int resetEnemies(Enemy* enemies) {
 /*
     Updates enemy positions (called once per loop)
 */
-char updateEnemyPositions(Enemy* enemies, int position[], int velocity[]) {
+char updateEnemyPositions(Enemy* enemies, int position[], int velocity[], int* totalEnemyCount) {
   for (int i = 0; i < 10; i++) {
 
     // UPDATE ENEMIES POSITION BY THEIR VELOCITY
@@ -158,6 +139,7 @@ char updateEnemyPositions(Enemy* enemies, int position[], int velocity[]) {
 
     // ENEMIES OUT OF BOUNDS CASE
     if (enemies[i].position[0] > 600 || enemies[i].position[1] > 600) {
+      *totalEnemyCount += 1;
       if (enemies[i].velocity[0] > 0) {
         enemies[i].position[0] = 0;
         enemies[i].position[1] = rand() % 600;
@@ -187,15 +169,14 @@ int checkInterjection(Enemy* enemies, int position[]) {
 /*
     Check for a soon possible interjection and makes the player aware of the possibility
 */
-int checkPossibleInterjection(Enemy* enemies, int position[]) {
+void checkPossibleInterjection(Enemy* enemies, int position[]) {
   for (int i = 0; i < 10; i++) {
     if ((position[0] - 15) <= enemies[i].position[0] && enemies[i].position[0] <= (position[0] + 15)) {
-      printf("\npossible interjection on x axis, enemy position %d, player position %d\n", enemies[i].position[0], position[0]);
+      printf("\n!!!WARNING!!!\nPossible interjection on X-axis\n Enemy X Position: %d\n", enemies[i].position[0]);
     } else if ((position[1] - 15) <= enemies[i].position[1] && enemies[i].position[1] <= (position[1] + 15)) {
-      printf("possible interjection on y axis, enemy position %d, player position %d\n", enemies[i].position[1], position[1]);
+      printf("\n!!!WARNING!!!\nPossible interjection on Y-axis\n Enemy Y Position: %d\n", enemies[i].position[1]);
     }
   }
-  return 1;
 }
 
 /*
