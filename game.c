@@ -9,6 +9,7 @@ int playerSize = 30;
 
 typedef struct {
   int lives;
+  int level;
   int position[2];
   int velocity[2];
 } Player;
@@ -18,19 +19,76 @@ typedef struct {
   int velocity[2];
 } Enemy;
 
+int playing;
 
 // DEFINE FUNCTIONS
 char movePlayer(char moveKey, int position[], int velocity[], int size);
-char checkEnemyPositions(Enemy* enemies, int position[], int velocity[]);
-void checkPlayerPosition(int position[], int size);
+char updateEnemyPositions(Enemy* enemies, int position[], int velocity[]);
+void checkPlayerPosition(int position[]);
+void formatEnemies(Enemy* enemies);
+int makeEnemies(Enemy* enemies);
+int checkInterjection(Enemy* enemies, int position[]);
+void checkPossibleInterjection(Enemy* enemies, int position[]);
+int resetEnemies(Enemy* enemies);
 
 int main() {
-  Player player1 = {3, {300,300}, {0,0}};
+int playing = 'Y';
+do {
+  Player player1 = {3, 1, {300,300}, {0,0}};
+
   Enemy* enemies = malloc(10 * sizeof *enemies);
+  resetEnemies(enemies);
 
   srand(time(0));
 
-  // COULD BE MAKEENEMIES() FUNCTION:
+  do {
+    checkInterjection(enemies, player1.position);
+    char playerMove = ' ';
+    printf("\nInput a move (W,A,S,D): ");
+    scanf(" %c", &playerMove);
+    playerMove = toupper(playerMove);
+  
+    movePlayer(playerMove, player1.position, player1.velocity, 2); // move the new player based on the given char (update position, based on velocity applied)
+    checkPlayerPosition(player1.position); // set to within bounds if out of bounds, etc
+    updateEnemyPositions(enemies, player1.position, player1.velocity);
+    if (checkInterjection(enemies, player1.position) != 0) {
+      player1.lives--;
+      printf("LIVES %d\n---------------------------------------------------------------------------------\n", player1.lives);
+      resetEnemies(enemies);
+    };
+  } while (player1.lives != 0);
+  printf("Would you like to play again? (Y/N)\n");
+  scanf(" %c", &playing);
+  playing = toupper(playing);
+  if (playing == 'Y') {
+    continue;
+  } else {
+    playing = 'N';
+  }
+} while (playing == 'Y');
+  printf("\nThanks for playing\n");
+  scanf(" %c", &playing);
+  return 0;
+}
+
+/*
+    Keeps the player within playspace
+    SHOULD BE VOID
+*/
+void checkPlayerPosition(int position[]) {  
+  if (position[0] > 600) {
+    position[0] = 600;
+  } else if (position[0] < 0) {
+    position[0] = 0;
+  }
+  if (position[1] > 600) {
+    position[1] = 600;
+  } else if (position[1] < 0) {
+    position[1] = 0;
+  }
+}
+
+int makeEnemies(Enemy* enemies) {
   for (int i = 0; i < 10; i++) {
     // left or right determinant
     if (i % 2 > 0) {
@@ -42,105 +100,107 @@ int main() {
       enemies[i].position[1] = rand() % 600;
       enemies[i].velocity[0] = rand() % 15;
     }
-    printf("\nPOSITION [%i]: %i, %i\n", i, enemies[i].position[0], enemies[i].position[1]);
-    printf("VELOCITY [%i]: %i, %i\n", i, enemies[i].velocity[0], enemies[i].velocity[1]);
   }
-
-  do {
-    char playerMove = ' ';
-    printf("\nInput a move (W,A,S,D):\n");
-    scanf(" %c", &playerMove);
-    playerMove = toupper(playerMove);
-  
-    movePlayer(playerMove, player1.position, player1.velocity, 2); // move the new player based on the given char (update position, based on velocity applied)
-    checkPlayerPosition(player1.position, 2); // set to within bounds if out of bounds, etc
-    checkEnemyPositions(enemies, player1.position, player1.velocity);
-  
-    player1.lives--;
-  } while (player1.lives);
-
-  return 0;
+ return 1;
 }
 
 /*
-    Keeps the player within playspace
-    SHOULD BE VOID
+    The rand() function is acting funky
+    This function corrects enemies that have values far out of the proper range
 */
-void checkPlayerPosition(int position[], int size) {
-  
+void formatEnemies(Enemy* enemies) {
+  for (int i = 0; i < 10; i++) {
+    if (enemies[i].position[0] > 0 && enemies[i].position[1] > 0) {
+      enemies[i].position[0] = 0;
+      enemies[i].position[1] = 57;
+    } else if (enemies[i].position[0] > 600) {
+      enemies[i].position[0] = 300;
+    } else if (enemies[i].position[1] > 600) {
+      enemies[i].position[1] = 300;
+    }
+
+    if (enemies[i].velocity[0] > 0 && enemies[i].velocity[1] > 0 && enemies[i].position[1] > 0) {
+      enemies[i].velocity[0] = 7;
+      enemies[i].velocity[1] = 0;
+    } else if (enemies[i].velocity[0] > 0 && enemies[i].velocity[1] > 0 && enemies[i].position[0] > 0) {
+      enemies[i].velocity[1] = 7;
+      enemies[i].velocity[0] = 0;
+    } else if (enemies[i].velocity[0] > 14) {
+      enemies[i].velocity[0] = 7;
+    } else if (enemies[i].velocity[1] > 14) {
+      enemies[i].velocity[1] = 7;
+    }
+  }
 }
 
 /*
-    Will check enemy positions and determine if enemies are on track to hit the player
-    It will make the player aware if enemies are on track to hit them (and maybe return a recommended move)
-    It will then ask the player for an input (char) either W, A, S, or D to move up, left, down, right respectively
-    Returns input to playermove variable in main();
-
-    THIS COULD BE TWO FUNCTIONS OR SEPERATE: ONE WHERE ENEMIES ARE CHECKED AND PLAYER IS MADE AWARE AND THEN ANOTHER FUNCTIONS FOR SCANF OR SCANF IN MAIN()
+    for end of level
 */
-char checkEnemyPositions(Enemy* enemies, int position[], int velocity[]) {
+int resetEnemies(Enemy* enemies) {
+  if (makeEnemies(enemies)) {
+    formatEnemies(enemies);
+  }
+  return 1;
+}
+
+/*
+    Updates enemy positions (called once per loop)
+*/
+char updateEnemyPositions(Enemy* enemies, int position[], int velocity[]) {
   for (int i = 0; i < 10; i++) {
 
-    /*
-        implement logic to find which position the enemy has been placed in and add their velocity to the position
-
-        -------------------------------------------------------------------------------------------------------------
-
-        FIND CASES OF RAND() MESSING UP - ESSENTIALLY JUST FOR 1st ITERATION
-        should I start with cases that are just both set? and then within that check if the values are under 600, and set one to 0
-
-        if enemiesP0 or enemiesP1 is over 600 && both are set, if enemiesP0 or enemiesP1 is over 600
-        if enemiesV0 or enemiesV1 is over 14 && both are set
-    
-        following if statements would ideally be removed, but for now due to RAND() they are there
-        it's essentially creating some set values for enemy positions/velocity
-    */
-    if (enemies[i].position[0] > 0 && enemies[i].position[1] > 0) {
-
-    } else if (enemies[i].position[0] > 600) {
-
-    } else if (enemies[i].position[1] > 600) {
-
-    } else {
-
+    // UPDATE ENEMIES POSITION BY THEIR VELOCITY
+    if (enemies[i].velocity[1] > 0) {
+      enemies[i].position[1] += enemies[i].velocity[1];
+    } else if (enemies[i].velocity[0] > 0) {
+      enemies[i].position[0] += enemies[i].velocity[0];
     }
 
-    if (enemies[i].velocity[0] > 0 && enemies[i].velocity > 0) {
-
-    } else if (enemies[i].velocity[0] > 600) {
-
-    } else if (enemies[i].velocity[1] > 600) {
-
-    } else {
-
+    // ENEMIES OUT OF BOUNDS CASE
+    if (enemies[i].position[0] > 600 || enemies[i].position[1] > 600) {
+      if (enemies[i].velocity[0] > 0) {
+        enemies[i].position[0] = 0;
+        enemies[i].position[1] = rand() % 600;
+      } else if (enemies[i].velocity[1] > 0) {
+        enemies[i].position[1] = 0;
+        enemies[i].position[0] = rand() % 600;
+      }
     }
 
-
-    /*
-        This is the actual functionality (it's much like the moveplayer functionality)
-    */
-    if () {
-
-    } 
-    printf("\nenemy [%d] info: \nPOSITION: x: %d, y: %d, \nVELOCITY: x: %d, y: %d\n", i, enemies[i].position[0], enemies[i].position[1], enemies[i].velocity[0], enemies[i].velocity[1]);
   }
   return 'T';
 }
 
 /*
+    Check if an enemy is currently interjecting with the player
+    Takes size of enemy and enemy into count
+*/
+int checkInterjection(Enemy* enemies, int position[]) {
+  for (int i = 0; i < 10; i++) {
+    if (abs((enemies[i].position[0]+10) - (position[0]+15)) < 20 && abs((enemies[i].position[1]-10) - (position[1]-15)) <= 20) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+/*
+    Check for a soon possible interjection and makes the player aware of the possibility
+*/
+void checkPossibleInterjection(Enemy* enemies, int position[]) {
+  for (int i = 0; i < 10; i++) {
+    if (abs((enemies[i].position[0]+10) - (position[0]+15)) < 600) {
+      printf("possible interjection on current X axis");
+    } else if (abs((enemies[i].position[1]+10) - (position[1]+15)) < 600) {
+      printf("possible interjection on current Y axis");
+    }
+  }
+}
+/*
     Changes the players velocity to 7 in whichever direction they chose during the enemies check
     Then checks the players current position against the size of the canvas and corrects the player to be within bounds
 */
 char movePlayer(char moveKey, int position[], int velocity[], int size) {
-  printf("\nbefore move: %c\n", moveKey);
-  printf("position 0: %d\n", position[0]);
-  printf("position 1: %d\n", position[1]);
-  
-  /*
-      technically velocity is not need for the player in this game as it will be presented essentially frame-by-frame
-      asking you for a input over and over about where you would need to move
-  */
-
   switch (moveKey) {
     case ('W'):
       velocity[1] = 7;
@@ -162,10 +222,11 @@ char movePlayer(char moveKey, int position[], int velocity[], int size) {
       break;
   }
 
-  printf("\nafter move: %c\n", moveKey);
-  printf("position 0: %d\n", position[0]);
-  printf("position 1:%d\n", position[1]);
+  velocity[0] = 0;
+  velocity[1] = 0;
 
+  printf("\nAfter Move: %c\n", moveKey);
+  printf("Your Position (%d, %d)\n", position[0], position[1]);
   return 'T';
 }
 
