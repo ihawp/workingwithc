@@ -93,7 +93,7 @@ char checkEnemyPositions(Enemy* enemies, int position[], int velocity[]) {
     Then checks the players current position against the size of the canvas and corrects the player to be within bounds
 */
 char movePlayer(char moveKey, int position[], int velocity[], int size) {
-  printf("\nmove: %c\n", moveKey);
+  printf("\nbefore move: %c\n", moveKey);
   printf("position 0: %d\n", position[0]);
   printf("position 1: %d\n", position[1]);
   
@@ -109,7 +109,7 @@ char movePlayer(char moveKey, int position[], int velocity[], int size) {
       break;
     case ('A'):
       velocity[0] = -7;
-      position[0] += velocity[1];
+      position[0] += velocity[0];
       break;
     case ('S'):
       velocity[1] = -7;
@@ -117,11 +117,16 @@ char movePlayer(char moveKey, int position[], int velocity[], int size) {
       break;
     case ('D'):
       velocity[0] = 7;
-      position[0] += velocity[1];
+      position[0] += velocity[0];
       break;
     default:
       break;
   }
+
+  printf("\nafter move: %c\n", moveKey);
+  printf("position 0: %d\n", position[0]);
+  printf("position 1:%d\n", position[1]);
+
   return 'T';
 }
 
