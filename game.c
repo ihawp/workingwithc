@@ -35,8 +35,10 @@ int main() {
     // left or right determinant
     if (i % 2 > 0) {
       enemies[i].position[0] = rand() % 600;
+      enemies[i].position[1] = 0;
       enemies[i].velocity[1] = rand() % 15;
     } else {
+      enemies[i].position[0] = 0;
       enemies[i].position[1] = rand() % 600;
       enemies[i].velocity[0] = rand() % 15;
     }
@@ -81,8 +83,45 @@ char checkEnemyPositions(Enemy* enemies, int position[], int velocity[]) {
 
     /*
         implement logic to find which position the enemy has been placed in and add their velocity to the position
-    */
 
+        -------------------------------------------------------------------------------------------------------------
+
+        FIND CASES OF RAND() MESSING UP - ESSENTIALLY JUST FOR 1st ITERATION
+        should I start with cases that are just both set? and then within that check if the values are under 600, and set one to 0
+
+        if enemiesP0 or enemiesP1 is over 600 && both are set, if enemiesP0 or enemiesP1 is over 600
+        if enemiesV0 or enemiesV1 is over 14 && both are set
+    
+        following if statements would ideally be removed, but for now due to RAND() they are there
+        it's essentially creating some set values for enemy positions/velocity
+    */
+    if (enemies[i].position[0] > 0 && enemies[i].position[1] > 0) {
+
+    } else if (enemies[i].position[0] > 600) {
+
+    } else if (enemies[i].position[1] > 600) {
+
+    } else {
+
+    }
+
+    if (enemies[i].velocity[0] > 0 && enemies[i].velocity > 0) {
+
+    } else if (enemies[i].velocity[0] > 600) {
+
+    } else if (enemies[i].velocity[1] > 600) {
+
+    } else {
+
+    }
+
+
+    /*
+        This is the actual functionality (it's much like the moveplayer functionality)
+    */
+    if () {
+
+    } 
     printf("\nenemy [%d] info: \nPOSITION: x: %d, y: %d, \nVELOCITY: x: %d, y: %d\n", i, enemies[i].position[0], enemies[i].position[1], enemies[i].velocity[0], enemies[i].velocity[1]);
   }
   return 'T';
