@@ -28,7 +28,7 @@ void checkPlayerPosition(int position[]);
 void formatEnemies(Enemy* enemies);
 int makeEnemies(Enemy* enemies);
 int checkInterjection(Enemy* enemies, int position[]);
-void checkPossibleInterjection(Enemy* enemies, int position[]);
+int checkPossibleInterjection(Enemy* enemies, int position[]);
 int resetEnemies(Enemy* enemies);
 
 int main() {
@@ -42,7 +42,6 @@ do {
   srand(time(0));
 
   do {
-    checkInterjection(enemies, player1.position);
     char playerMove = ' ';
     printf("\nInput a move (W,A,S,D): ");
     scanf(" %c", &playerMove);
@@ -51,6 +50,7 @@ do {
     movePlayer(playerMove, player1.position, player1.velocity, 2); // move the new player based on the given char (update position, based on velocity applied)
     checkPlayerPosition(player1.position); // set to within bounds if out of bounds, etc
     updateEnemyPositions(enemies, player1.position, player1.velocity);
+    checkPossibleInterjection(enemies, player1.position);
     if (checkInterjection(enemies, player1.position) != 0) {
       player1.lives--;
       printf("LIVES %d\n---------------------------------------------------------------------------------\n", player1.lives);
@@ -187,15 +187,17 @@ int checkInterjection(Enemy* enemies, int position[]) {
 /*
     Check for a soon possible interjection and makes the player aware of the possibility
 */
-void checkPossibleInterjection(Enemy* enemies, int position[]) {
+int checkPossibleInterjection(Enemy* enemies, int position[]) {
   for (int i = 0; i < 10; i++) {
-    if (abs((enemies[i].position[0]+10) - (position[0]+15)) < 600) {
-      printf("possible interjection on current X axis");
-    } else if (abs((enemies[i].position[1]+10) - (position[1]+15)) < 600) {
-      printf("possible interjection on current Y axis");
+    if ((position[0] - 15) <= enemies[i].position[0] && enemies[i].position[0] <= (position[0] + 15)) {
+      printf("\npossible interjection on x axis, enemy position %d, player position %d\n", enemies[i].position[0], position[0]);
+    } else if ((position[1] - 15) <= enemies[i].position[1] && enemies[i].position[1] <= (position[1] + 15)) {
+      printf("possible interjection on y axis, enemy position %d, player position %d\n", enemies[i].position[1], position[1]);
     }
   }
+  return 1;
 }
+
 /*
     Changes the players velocity to 7 in whichever direction they chose during the enemies check
     Then checks the players current position against the size of the canvas and corrects the player to be within bounds
