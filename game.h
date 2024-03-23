@@ -1,1 +1,1 @@
-int gameFunction(void);
+#include <stdio.h>
