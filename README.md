@@ -1,3 +1,3 @@
 # What is this?
 
-I'm just learning C:
+I'm just learning C
