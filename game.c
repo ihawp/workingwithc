@@ -7,7 +7,7 @@
 int main() {
 char playing = 'Y';
 do {
-  int totalEnemyCount = 174;
+  int totalEnemyCount = 0;
   int *pTOTAL = &totalEnemyCount;
   Player player1 = {3, 1, {300,300}, {0,0}};
 
@@ -37,9 +37,9 @@ do {
     }
     printf("\nSCORE: %d\n", totalEnemyCount);
   } while (player1.lives != 0);
-  printf("\nWould you like to play again? (Y/N)\n");
-  scanf(" %c", &playing);
-  playing = toupper(playing);
+    printf("\nWould you like to play again? (Y/N)\n");
+    scanf(" %c", &playing);
+    playing = toupper(playing);
   if (playing == 'Y') {
     continue;
   } else {
@@ -51,10 +51,6 @@ do {
   return 0;
 }
 
-/*
-    Keeps the player within playspace
-    SHOULD BE VOID
-*/
 void checkPlayerPosition(int position[]) {  
   if (position[0] > 600) {
     position[0] = 600;
@@ -69,10 +65,6 @@ void checkPlayerPosition(int position[]) {
 }
 
 
-/*
-    doesn't actually make enemies
-    just gives their properties values
-*/
 int makeEnemies(Enemy* enemies) {
   for (int i = 0; i < 10; i++) {
     // left or right determinant
@@ -118,9 +110,6 @@ void formatEnemies(Enemy* enemies) {
   }
 }
 
-/*
-    resets enemies to an original random state
-*/
 int resetEnemies(Enemy* enemies) {
   if (makeEnemies(enemies)) {
     formatEnemies(enemies);
@@ -128,9 +117,6 @@ int resetEnemies(Enemy* enemies) {
   return 1;
 }
 
-/*
-    Updates enemy positions (called once per loop)
-*/
 char updateEnemyPositions(Enemy* enemies, int position[], int velocity[], int* totalEnemyCount) {
   for (int i = 0; i < 10; i++) {
 
@@ -157,10 +143,6 @@ char updateEnemyPositions(Enemy* enemies, int position[], int velocity[], int* t
   return 'T';
 }
 
-/*
-    Check if an enemy is currently interjecting with the player
-    Takes size of enemy and enemy into count
-*/
 int checkInterjection(Enemy* enemies, int position[]) {
   for (int i = 0; i < 10; i++) {
     if (abs((enemies[i].position[0]+10) - (position[0]+15)) < 20 && abs((enemies[i].position[1]-10) - (position[1]-15)) <= 20) {
@@ -170,9 +152,6 @@ int checkInterjection(Enemy* enemies, int position[]) {
   return 0;
 }
 
-/*
-    Check for a soon possible interjection and makes the player aware of the possibility
-*/
 void checkPossibleInterjection(Enemy* enemies, int position[]) {
   for (int i = 0; i < 10; i++) {
     if (enemies[i].velocity[0] > 0) {
@@ -187,10 +166,6 @@ void checkPossibleInterjection(Enemy* enemies, int position[]) {
   }
 }
 
-/*
-    Changes the players velocity to 7 in whichever direction they chose during the enemies check
-    Then checks the players current position against the size of the canvas and corrects the player to be within bounds
-*/
 char movePlayer(char moveKey, int position[], int velocity[], int size) {
   switch (moveKey) {
     case ('W'):

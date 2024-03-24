@@ -1,4 +1,3 @@
-// DEFINE VARIABLES
 char playing;
 typedef struct {
   int lives;
@@ -11,7 +10,6 @@ typedef struct {
   int velocity[2];
 } Enemy;
 
-// DEFINE FUNCTIONS
 char movePlayer(char moveKey, int position[], int velocity[], int size);
 char updateEnemyPositions(Enemy* enemies, int position[], int velocity[], int* totalEnemyCount);
 void checkPlayerPosition(int position[]);
