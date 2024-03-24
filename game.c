@@ -171,10 +171,14 @@ int checkInterjection(Enemy* enemies, int position[]) {
 */
 void checkPossibleInterjection(Enemy* enemies, int position[]) {
   for (int i = 0; i < 10; i++) {
-    if ((position[0] - 15) <= enemies[i].position[0] && enemies[i].position[0] <= (position[0] + 15)) {
-      printf("\n!!!WARNING!!!\nPossible interjection on X-axis\n Enemy X Position: %d\n", enemies[i].position[0]);
-    } else if ((position[1] - 15) <= enemies[i].position[1] && enemies[i].position[1] <= (position[1] + 15)) {
-      printf("\n!!!WARNING!!!\nPossible interjection on Y-axis\n Enemy Y Position: %d\n", enemies[i].position[1]);
+    if (enemies[i].velocity[0] > 0) {
+      if ((position[1] - 15) <= enemies[i].position[1] && enemies[i].position[1] <= (position[1] + 15)) {
+        printf("\n!!!WARNING!!!\nPossible Interjection *>>>>*\n Enemy Y Coordinate: %d\n", enemies[i].position[1]);
+      }
+    } else if (enemies[i].velocity[1] > 0) {
+      if ((position[0] - 15) <= enemies[i].position[0] && enemies[i].position[0] <= (position[0] + 15)) {
+        printf("\n!!!WARNING!!!\nPossible Interjection *^^^^*\n Enemy X Coordinate: %d\n", enemies[i].position[0]);
+      }
     }
   }
 }
@@ -212,4 +216,6 @@ char movePlayer(char moveKey, int position[], int velocity[], int size) {
   printf("Your Position (%d, %d)\n", position[0], position[1]);
   return 'T';
 }
+
+
 
