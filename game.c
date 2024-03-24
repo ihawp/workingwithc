@@ -7,7 +7,7 @@
 int main() {
 char playing = 'Y';
 do {
-  int totalEnemyCount = 0;
+  int totalEnemyCount = 174;
   int *pTOTAL = &totalEnemyCount;
   Player player1 = {3, 1, {300,300}, {0,0}};
 
@@ -26,11 +26,15 @@ do {
     checkPlayerPosition(player1.position); // set to within bounds if out of bounds, etc
     updateEnemyPositions(enemies, player1.position, player1.velocity, pTOTAL);
     checkPossibleInterjection(enemies, player1.position);
+    if (totalEnemyCount/(player1.level*175) >= 1) {
+      player1.level += 1;
+      printf("\nYou beat level %d, now time for level %d!\n", player1.level - 1, player1.level);
+    }
     if (checkInterjection(enemies, player1.position) != 0) {
       player1.lives--;
       printf("LIVES %d\n---------------------------------------------------------------------------------\n", player1.lives);
       resetEnemies(enemies);
-    };
+    }
     printf("\nSCORE: %d\n", totalEnemyCount);
   } while (player1.lives != 0);
   printf("\nWould you like to play again? (Y/N)\n");
